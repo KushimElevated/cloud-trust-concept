@@ -144,3 +144,38 @@ test('reset clears scenario records and evidence exports preserve cross-capabili
   assert.equal(engine.exceptions.length,0);
   assert.equal(engine.metrics().trusted,4);
 });
+
+test('an exception closes when its control passes and cannot waive a later recurrence',()=>{
+  const engine=setup(),envId='env-analytics',env=engine.env(envId);
+  const exception=engine.requestException({envId,reason:'Allow a controlled connectivity test for the data team.',compensation:'Restrict administrative ingress to the approved test runner.'});
+  engine.reviewException(exception.id,true);
+  engine.changeControl(envId,'network',true);
+  assert.equal(exception.status,'Closed');
+  assert.ok(engine.events.some(e=>e.action==='Exception closed'&&e.exceptionId===exception.id));
+  engine.changeControl(envId,'network',false);
+  assert.equal(engine.trust(env).label,'Needs attention');
+  assert.equal(engine.trust(env).allowed,false);
+  assert.equal(engine.requestAccess(input(engine,{envId,taskId:engine.tasks.find(t=>t.envId===envId).id})).status,'Denied');
+});
+
+test('provisioned task identifiers never collide with the seeded approved changes',()=>{
+  for(let sequence=2030;sequence<=2046;sequence++){
+    const engine=setup();
+    while(engine.sequence<sequence)engine.id('TEST');
+    const env=engine.provision({name:'collision-check',provider:'AWS',tier:'Production',owner:'Platform Team'});
+    const ids=engine.tasks.map(t=>t.id);
+    assert.equal(new Set(ids).size,ids.length,`sequence ${sequence}`);
+    for(const seeded of engine.tasks.filter(t=>t.envId!==env.id&&t.envId!=='env-analytics'))assert.equal(engine.requestAccess(input(engine,{envId:seeded.envId,taskId:seeded.id})).status,'Granted',`${seeded.id} at sequence ${sequence}`);
+  }
+});
+
+test('identity revocations record the failed checks without linking unrelated workload findings',()=>{
+  const engine=setup(),envId='env-analytics';
+  const exception=engine.requestException({envId,reason:'Allow a controlled connectivity test for the data team.',compensation:'Restrict administrative ingress to the approved test runner.'});
+  engine.reviewException(exception.id,true);
+  engine.requestAccess(input(engine,{envId,taskId:engine.tasks.find(t=>t.envId===envId).id}));
+  engine.changeIdentity('casey','mfa',false);
+  const revocation=engine.events.find(e=>e.action==='Access automatically revoked');
+  assert.deepEqual(revocation.findingIds,[]);
+  assert.deepEqual(revocation.failedChecks,['mfa']);
+});

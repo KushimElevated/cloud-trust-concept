@@ -148,3 +148,38 @@ test('exports and reset include assurance and governance while protecting retain
   e.reset();
   assert.equal(e.findings.length,1);assert.equal(e.riskDecisions.length,0);assert.equal(e.attestations.length,0);assert.equal(e.scans.length,0);
 });
+
+test('retirement closes pending access reviews instead of leaving them in the queue',()=>{
+  const e=setup();
+  const request=e.requestAccess({envId:'env-payments',personId:'casey',role:'Platform administrator',taskId:e.tasks.find(t=>t.envId==='env-payments').id,minutes:30,reason:'Rotate the platform credentials during the approved window.'});
+  assert.equal(request.status,'Pending review');
+  e.changeLifecycle('env-payments','Retiring','The workload is being consolidated into its successor platform.');
+  assert.equal(request.status,'Closed');
+  assert.throws(()=>e.reviewAccess(request.id,true),/no longer awaiting review/);
+  assert.equal(e.sessions.length,0);
+});
+
+test('the simulated reviewer cannot approve an attestation or exception for a workload they own',()=>{
+  const e=setup();
+  e.updateOwner('env-payments',{owner:'Taylor Brooks',costCenter:'CC-4100',reviewDays:30});
+  const a=attest(e);
+  assert.throws(()=>e.reviewAttestation(a.id,true,rationale),/independent reviewer/);
+  assert.equal(a.status,'Submitted');
+  e.updateOwner('env-analytics',{owner:'Taylor Brooks',costCenter:'CC-4103',reviewDays:30});
+  const exception=e.requestException({envId:'env-analytics',reason:'Run the controlled connectivity test during the planned window.',compensation:'Restrict access to the approved test runner IP address.'});
+  assert.throws(()=>e.reviewException(exception.id,true),/workload they own/);
+  assert.equal(exception.status,'Pending review');
+});
+
+test('evidence records a drift before the finding it causes and does not report no-op restorations',()=>{
+  const e=setup();
+  e.changeControl('env-payments','image',false);
+  const [drift,finding]=[e.events.findIndex(x=>x.action==='Drift detected'),e.events.findIndex(x=>x.action==='Finding detected')];
+  assert.ok(drift>finding,'events are newest first, so the cause must have the larger index');
+  assert.deepEqual(e.events[drift].findingIds,[e.findings[0].id]);
+  const count=e.events.length;
+  e.changeControl('env-customer','logging',true);
+  assert.equal(e.events.length,count+1);
+  assert.equal(e.events[0].action,'Signal re-observed');
+  assert.equal(e.events.filter(x=>x.action==='Control restored').length,0);
+});
