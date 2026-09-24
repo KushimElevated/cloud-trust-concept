@@ -63,7 +63,7 @@ function render() {
     <div class="content-shell">
       <header class="topbar"><div class="breadcrumb"><span>Workspace</span>${icon('chevron')}<strong>${titles[ui.page]}</strong></div><div class="topbar-right"><span class="demo-badge">SYNTHETIC DEMO</span><span class="topbar-date">${date(engine.now())}</span><span class="avatar avatar-small" title="Demo operator">PM</span></div></header>
       <main id="main" tabindex="-1">${({overview:overview,foundations:foundations,access:access,assurance:pillars.assurance,governance:pillars.governance,implementation:implementation.view}[ui.page])(m)}</main>
-      <footer class="page-footer"><span>${icon('info')} Simulated signals, workflows, and enforcement. No cloud accounts connected.</span><span>Cloud Trust <span class="footer-divider">/</span> Product concept v2.1</span></footer>
+      <footer class="page-footer"><span>${icon('info')} Simulated signals, workflows, and enforcement. No cloud accounts connected.</span><span>Cloud Trust <span class="footer-divider">/</span> Product concept v2.2</span></footer>
     </div>
   </div>`;
   updateCountdowns();

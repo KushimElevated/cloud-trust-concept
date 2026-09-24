@@ -1,7 +1,12 @@
 {
   "product": "Cloud Trust",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 19,
+      "sha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c"
+    },
     {
       "path": ".gitignore",
       "bytes": 45,
@@ -9,18 +14,18 @@
     },
     {
       "path": "README.md",
-      "bytes": 13448,
-      "sha256": "b12456f733c69fc38f3e53fc64e0a935eda70db0d89d1bd5221d8ac0734062a8"
+      "bytes": 16240,
+      "sha256": "c1e3a98e4d49d4aba3c3d05159bfd5bcd44b4eaf0405a5181b2d567c11f87c16"
     },
     {
       "path": "START_HERE.md",
-      "bytes": 2500,
-      "sha256": "834f3c44c7f118061c9950359a585d0dffddd32f8bcb3ca07f31d9c3b33babf0"
+      "bytes": 2676,
+      "sha256": "60316c63f0dfcedd430cf0dbc3cb80b041cbea05b02f60ee39408fdfbc2adfe4"
     },
     {
       "path": "dist/app.mjs",
-      "bytes": 51087,
-      "sha256": "4ef4ff58d7f8fbdcac877296d2d2de270c693311eeb437c885ace591a3c2be5e"
+      "bytes": 52414,
+      "sha256": "45bbaa2b8631da9e01389cd68a382765557fc59d80fa44bef828b24f2fe593e0"
     },
     {
       "path": "dist/cloud-trust-implementation.md",
@@ -29,8 +34,8 @@
     },
     {
       "path": "dist/engine.mjs",
-      "bytes": 33391,
-      "sha256": "bbf4253dc1343af87fb3f2fa76e5b5c54e3d04bdcc15703150b25c4db53286e1"
+      "bytes": 36214,
+      "sha256": "a7aeee71a1edbe84b20c7aafe8e51837a1a4f285b6de0ec44a60079ee8c47c0d"
     },
     {
       "path": "dist/implementation-data.mjs",
@@ -59,18 +64,23 @@
     },
     {
       "path": "dist/pillars.mjs",
-      "bytes": 29138,
-      "sha256": "6d23ba7f08c8874816324095ea25bbdafac4379cdbc9b538c62dd3138a496b4c"
+      "bytes": 29326,
+      "sha256": "17c0ec4c545c200c37e888e83e78e2d3be8cfb53d0bbd72a31259f8a342a7335"
     },
     {
       "path": "dist/styles.css",
-      "bytes": 47955,
-      "sha256": "8d5cef52953d4960db26d8ef8c79c8ccafedfc87b8457225b06e109624863bbc"
+      "bytes": 48047,
+      "sha256": "83f6e742d34711b82611912fd643544d62dbedc0301a38264e6326d8fe73c264"
     },
     {
       "path": "package.json",
-      "bytes": 488,
-      "sha256": "d29b89629ae831d6b3597983e42d07dbcd26d5ad1a546b7713fcce5eab0d822d"
+      "bytes": 652,
+      "sha256": "897826ac87c17fa3da23c04a7ccc234432c9719bb5b111955135f2a2e21313b5"
+    },
+    {
+      "path": "scripts/build-manifest.mjs",
+      "bytes": 1526,
+      "sha256": "88457023fc154f77f157697d166ebe31566f0eb635edf61b34cbf6d311138402"
     },
     {
       "path": "scripts/export-guide.mjs",
@@ -79,13 +89,18 @@
     },
     {
       "path": "tests/assurance-governance.test.mjs",
-      "bytes": 8620,
-      "sha256": "0ee3a6ef50f25328810648928e39243116335b59f94e3775098be5b8083e45de"
+      "bytes": 12544,
+      "sha256": "33c030d76de979000208cdd2c5c0bf9ff482f6f0ba732eb06551e28051ffc2b2"
     },
     {
       "path": "tests/engine.test.mjs",
-      "bytes": 7869,
-      "sha256": "27b6b20532a92495c65f25d4bc9e9fae6f81b03501304821d23b3b3c692bf473"
+      "bytes": 10148,
+      "sha256": "57d7ba477d1d52525bd1ab26d893b767cd538af563428f0cbdf432eec2daca18"
+    },
+    {
+      "path": "tests/package.test.mjs",
+      "bytes": 1566,
+      "sha256": "217d116219124514b062c500ab0bab1d0cfb0ad84923f4d0c48a3d0d4ac2633a"
     }
   ]
 }

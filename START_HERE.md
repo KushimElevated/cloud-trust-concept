@@ -1,6 +1,6 @@
 # Cloud Trust — complete project
 
-Version 2.1.0
+Version 2.2.0
 
 This package contains the combined working demo, all four product pillars, the in-product implementation guide, source files, tests, and supporting documentation.
 
@@ -30,22 +30,24 @@ Stop the server with Ctrl+C. The demo has no third-party runtime dependencies or
 - `README.md`: product overview, demonstration scenarios, engineering handoff, and limitations.
 - `dist/`: the complete runnable static application, including all source modules and styles.
 - `dist/cloud-trust-implementation.md`: the complete implementation guide, tool examples, and official documentation links.
-- `tests/`: 19 behavior checks covering access, assurance, governance, exceptions, and lifecycle.
+- `tests/`: 30 checks covering access, assurance, governance, exceptions, signal freshness, lifecycle, and package integrity.
 - `scripts/export-guide.mjs`: rebuilds the downloadable guide after editing its content.
+- `scripts/build-manifest.mjs`: rebuilds `FILE_MANIFEST.json` after changing any packaged file.
 - `package.json`: project metadata and developer commands.
 - `FILE_MANIFEST.json`: file inventory and SHA-256 checksums.
 
 ## Developer commands
 
-With a supported Node.js installation that includes the built-in test runner:
+With Node.js 22 or later:
 
 ```sh
 npm test
 npm run check
 npm run export-guide
+npm run manifest
 ```
 
-No package installation is required. Edit `dist/implementation-data.mjs` for guide content, then regenerate the guide using `npm run export-guide`.
+No package installation is required. Edit `dist/implementation-data.mjs` for guide content, then regenerate the guide using `npm run export-guide`. Run `npm run manifest` after changing any packaged file so the checksums stay current.
 
 ## Hosting elsewhere
 

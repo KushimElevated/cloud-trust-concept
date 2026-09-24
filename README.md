@@ -13,6 +13,17 @@ Cloud Trust is one working product demonstration with four connected pillars.
 
 Version 2 extends the existing unified demo. The original two standalone applications were not supplied for a source-level merge.
 
+## Changes in 2.2
+
+Version 2.2 applies the findings of a code and behavior audit of v2.1.
+
+- **Signal freshness is enforced (policy v1.6).** Posture evidence older than 24 hours fails the Current signals control, opens a finding, revokes dependent access, and makes current attestations Stale. A posture scan refreshes the evidence.
+- **Exceptions cover one failure.** An approved exception closes when its control passes again, so a recurrence can no longer be waived without a new review.
+- **Cleaner review boundaries.** Pending access reviews close when their workload retires, and the simulated reviewer cannot decide an attestation or exception for a workload they own.
+- **More accurate evidence.** Drift is recorded before the finding it causes; identity-driven revocations list the failed checks instead of unrelated workload findings; a no-op change is recorded as a re-observation; provisioned change IDs can no longer collide with the sample changes.
+- **Interface reliability and accessibility.** Background updates no longer discard a form that is being completed, keyboard focus is kept after actions and moved to the page heading on navigation, each view has its own browser title, and tables no longer cause sideways scrolling on phones.
+- **Tooling.** `npm run manifest` regenerates `FILE_MANIFEST.json`; tests check the guide export, catalog links, and manifest; GitHub Actions runs the checks on Node.js 22 and 24.
+
 ## Implement the strategy
 
 Version 2.1 adds **Implementation guide** to the supporting navigation and **How to implement** to each pillar. It is an in-product guide to the proposed production design. Example integrations remain unconnected candidates.
@@ -102,12 +113,15 @@ The application uses browser-native JavaScript modules, semantic HTML, and CSS. 
 | `dist/implementation.css` | Guide layouts and responsive styles |
 | `dist/cloud-trust-implementation.md` | Downloadable implementation handoff generated from the guide data |
 | `scripts/export-guide.mjs` | Regenerates the downloadable guide |
+| `scripts/build-manifest.mjs` | Regenerates `FILE_MANIFEST.json` sizes and SHA-256 checksums |
 | `tests/engine.test.mjs` | Original access and exception behavior checks |
-| `tests/assurance-governance.test.mjs` | Connected assurance, retirement, risk, attestation, and evidence checks |
+| `tests/assurance-governance.test.mjs` | Connected assurance, retirement, risk, attestation, freshness, and evidence checks |
+| `tests/package.test.mjs` | Guide export, tool catalog, and file manifest integrity checks |
+| `.github/workflows/ci.yml` | Runs `npm run check` and `npm test` on Node.js 22 and 24 |
 
 Serve `dist/` with a static HTTP server. For example: `python3 -m http.server 8080 --directory dist`. Opening the HTML via `file://` is not supported because JavaScript module loading requires HTTP.
 
-Run `npm test` for the 19 engine checks and `npm run check` for syntax validation. Version 2.1 template/runtime verification rendered 18 main and guide routes, exercised all 14 integration dialogs, search/filter/reset behavior, four example-copy actions, invalid routes, and legacy aliases. The seven-step connected demo still completed with revoked access and a current attestation. The downloadable Markdown matched the in-product content source. This was not a visual browser test; live browser QA was unavailable in the build environment.
+Run `npm test` for the 30 engine and package checks and `npm run check` for syntax validation. After changing any packaged file, run `npm run manifest`. Version 2.2 was additionally verified in headless Chromium at desktop and 375px widths: all routes rendered without console errors or horizontal scrolling, focus and in-progress forms survived background updates, and the seven-step demo completed. Version 2.1 template/runtime verification rendered 18 main and guide routes, exercised all 14 integration dialogs, search/filter/reset behavior, four example-copy actions, invalid routes, and legacy aliases. The seven-step connected demo still completed with revoked access and a current attestation. The downloadable Markdown matched the in-product content source. This was not a visual browser test; live browser QA was unavailable in the build environment.
 
 ## Simulation boundaries
 
