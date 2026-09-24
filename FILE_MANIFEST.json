@@ -1,0 +1,106 @@
+{
+  "product": "Cloud Trust",
+  "version": "2.2.0",
+  "files": [
+    {
+      "path": ".gitattributes",
+      "bytes": 19,
+      "sha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 45,
+      "sha256": "22703a9239bfd2c3fa2ed7e9f3e0f51483869be257f9406c6d26ae651e47ebe0"
+    },
+    {
+      "path": "README.md",
+      "bytes": 16215,
+      "sha256": "6eb79d9517191f87ed0e44f816c291d6e0c10e24b4d30883ff303772aca2d730"
+    },
+    {
+      "path": "START_HERE.md",
+      "bytes": 2676,
+      "sha256": "60316c63f0dfcedd430cf0dbc3cb80b041cbea05b02f60ee39408fdfbc2adfe4"
+    },
+    {
+      "path": "dist/app.mjs",
+      "bytes": 52488,
+      "sha256": "98124a46981a1aa27b08c5c0ce73b310e69223e44bee4f7659adbd21be3b5140"
+    },
+    {
+      "path": "dist/cloud-trust-implementation.md",
+      "bytes": 41250,
+      "sha256": "50547a2038c730f23c39eb9185868dcbc144fbb2f9d37677055b083ad26c2528"
+    },
+    {
+      "path": "dist/engine.mjs",
+      "bytes": 36214,
+      "sha256": "a7aeee71a1edbe84b20c7aafe8e51837a1a4f285b6de0ec44a60079ee8c47c0d"
+    },
+    {
+      "path": "dist/implementation-data.mjs",
+      "bytes": 44348,
+      "sha256": "30a4d9e938a3dce35bdbffb74f056a1ae661f0a8c098948c6f67ac67fa369239"
+    },
+    {
+      "path": "dist/implementation.css",
+      "bytes": 16143,
+      "sha256": "65e2ef6030b44cc4780cc15e88fa3bcec2eeaab39fa462c97184d59ae6c03a3c"
+    },
+    {
+      "path": "dist/implementation.mjs",
+      "bytes": 17518,
+      "sha256": "e0600dd51968b40a3a83d25e314bf5177fd27f8cbb3330deb27e2d2a804da438"
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 1293,
+      "sha256": "a9813ad3b062ceaf22f428d4054a975421ce8e749bb1092f2e0ef83e39fe47a9"
+    },
+    {
+      "path": "dist/pillars.css",
+      "bytes": 12805,
+      "sha256": "4ee46cb865ff898759ced539bab9c88557c42e728f5ebeade0f0d7e1cd46cfc6"
+    },
+    {
+      "path": "dist/pillars.mjs",
+      "bytes": 29326,
+      "sha256": "17c0ec4c545c200c37e888e83e78e2d3be8cfb53d0bbd72a31259f8a342a7335"
+    },
+    {
+      "path": "dist/styles.css",
+      "bytes": 48047,
+      "sha256": "83f6e742d34711b82611912fd643544d62dbedc0301a38264e6326d8fe73c264"
+    },
+    {
+      "path": "package.json",
+      "bytes": 652,
+      "sha256": "897826ac87c17fa3da23c04a7ccc234432c9719bb5b111955135f2a2e21313b5"
+    },
+    {
+      "path": "scripts/build-manifest.mjs",
+      "bytes": 1526,
+      "sha256": "88457023fc154f77f157697d166ebe31566f0eb635edf61b34cbf6d311138402"
+    },
+    {
+      "path": "scripts/export-guide.mjs",
+      "bytes": 267,
+      "sha256": "9705272837989362455e70c0628a2eb1408a084c28ca199f5dd9daf9ce1f9cfb"
+    },
+    {
+      "path": "tests/assurance-governance.test.mjs",
+      "bytes": 12544,
+      "sha256": "33c030d76de979000208cdd2c5c0bf9ff482f6f0ba732eb06551e28051ffc2b2"
+    },
+    {
+      "path": "tests/engine.test.mjs",
+      "bytes": 10148,
+      "sha256": "57d7ba477d1d52525bd1ab26d893b767cd538af563428f0cbdf432eec2daca18"
+    },
+    {
+      "path": "tests/package.test.mjs",
+      "bytes": 1566,
+      "sha256": "217d116219124514b062c500ab0bab1d0cfb0ad84923f4d0c48a3d0d4ac2633a"
+    }
+  ]
+}
