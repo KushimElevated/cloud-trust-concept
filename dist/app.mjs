@@ -39,8 +39,17 @@ const date = ts => new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',
 const button = (label,action,kind='secondary',ico='',attrs='') => `<button type="button" class="btn ${kind}" data-action="${action}" ${attrs}>${ico?icon(ico):''}${label}</button>`;
 const empty = (ico,title,body,action='') => `<div class="empty-state"><span class="empty-icon">${icon(ico)}</span><h3>${title}</h3><p>${body}</p>${action}</div>`;
 
+function focusKey(el) {
+  if(!el||!$('#app').contains(el))return null;
+  if(el.id)return '#'+CSS.escape(el.id);
+  const d=el.dataset;
+  if(d.action)return `[data-action="${CSS.escape(d.action)}"]`+['id','page','signal','approve'].filter(k=>d[k]!==undefined).map(k=>`[data-${k}="${CSS.escape(d[k])}"]`).join('');
+  if(el.matches('a[href]'))return `a[href="${CSS.escape(el.getAttribute('href'))}"]`;
+  return null;
+}
 function render() {
-  const m=engine.metrics();
+  const m=engine.metrics(),focused=focusKey(document.activeElement);
+  document.title=`${titles[ui.page]} | Cloud Trust`;
   $('#app').innerHTML=`<div class="workspace">
     <aside class="sidebar" aria-label="Primary navigation">
       <a class="brand" href="#overview">${logo}<span>Cloud Trust<span class="brand-sub">THE TRUST LIFECYCLE</span></span></a>
@@ -58,17 +67,18 @@ function render() {
     </div>
   </div>`;
   updateCountdowns();
+  if(focused&&!$('dialog[open]'))$(focused)?.focus({preventScroll:true});
 }
 function pendingCount() {return engine.requests.filter(r=>r.status==='Pending review').length+engine.exceptions.filter(e=>e.status==='Pending review').length+engine.attestations.filter(a=>a.status==='Submitted').length;}
 function pageHeader(eyebrow,title,description,actions='') {
   if(eyebrow.startsWith('PILLAR')&&taglines[ui.page])actions=`<a class="btn ghost" href="#implementation/playbooks/${ui.page}">${icon('implementation')}How to implement</a>`+actions;
-  return `<div class="page-heading"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${description}</p></div><div class="heading-actions">${actions}</div></div>`;
+  return `<div class="page-heading"><div><div class="eyebrow">${eyebrow}</div><h1 tabindex="-1">${title}</h1><p>${description}</p></div><div class="heading-actions">${actions}</div></div>`;
 }
 function overview(m) {
   const assurance=engine.assuranceMetrics(),governance=engine.governanceMetrics();
   return `${pageHeader('CLOUD TRUST / WORKSPACE','Trust overview','Start Trusted. Access When Trusted. Stay Trusted. Prove Trust.',button('Reset demo','reset','ghost','refresh')+button(ui.guide?'Continue walkthrough':'Run guided demo','guide','primary','play'))}
     <section class="metrics" aria-label="Live simulation metrics">
-      <article class="metric-card"><div class="metric-label">Trusted environments ${icon('foundations')}</div><div class="metric-value">${m.trusted}<span>/ ${m.total}</span></div><div class="metric-note"><span class="small-green">${m.total-m.trusted-m.conditional} need attention</span>${m.conditional?` · ${m.conditional} with an exception`:' · Across three clouds'}</div></article>
+      <article class="metric-card"><div class="metric-label">Trusted environments ${icon('foundations')}</div><div class="metric-value">${m.trusted}<span>/ ${m.total}</span></div><div class="metric-note"><span class="${m.total-m.trusted-m.conditional?'small-amber':'small-green'}">${m.total-m.trusted-m.conditional} need attention</span>${m.conditional?` · ${m.conditional} with an exception`:' · Across three clouds'}</div></article>
       <article class="metric-card"><div class="metric-label">Active privileged sessions ${icon('access')}</div><div class="metric-value">${m.active}<span class="metric-word">temporary</span></div><div class="metric-note">No standing grants in this simulation</div></article>
       <article class="metric-card"><div class="metric-label">Unresolved assurance findings ${icon('assurance')}</div><div class="metric-value">${assurance.open}<span class="metric-word">findings</span></div><div class="metric-note">${assurance.critical} critical · ${assurance.inProgress} in progress</div></article>
       <article class="metric-card"><div class="metric-label">Current control attestations ${icon('governance')}</div><div class="metric-value">${governance.current}<span>/ ${governance.coverageDenominator}</span></div><div class="metric-note">${governance.reviewPending} awaiting review · ${governance.exceptions} active exceptions</div></article>
@@ -123,16 +133,22 @@ function evidence(embedded=false) {
 
 function openDialog(title,body,footer='',type='') {
   const root=$('#dialog-root');
+  ui.modal=null;
   if($('dialog',root)) $('dialog',root).close();
   root.innerHTML=`<dialog class="modal ${type}" aria-labelledby="modal-title"><div class="modal-header"><h2 id="modal-title">${title}</h2><button class="icon-button" aria-label="Close dialog" data-action="close">${icon('x')}</button></div><div class="modal-body">${body}</div><div class="modal-feedback" role="status" aria-live="polite"></div>${footer?`<div class="modal-footer">${footer}</div>`:''}</dialog>`;
   const dialog=$('dialog',root); dialog.showModal();
   dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeDialog();}});
-  dialog.addEventListener('close',()=>{if(dialog===$('dialog'))ui.modal=null;});
+  dialog.addEventListener('close',()=>{if(dialog===$('dialog'))ui.modal=null;if(!$('dialog[open]')&&(!document.activeElement||document.activeElement===document.body))$('#main')?.focus({preventScroll:true});});
+}
+function dialogHasUserInput() {
+  const dialog=$('dialog[open]');if(!dialog)return false;
+  return [...dialog.querySelectorAll('input:not([type=hidden]),textarea,select')].some(el=>el.tagName==='SELECT'?[...el.options].some(o=>o.selected!==o.defaultSelected):el.value!==el.defaultValue);
 }
 function closeDialog() { const dialog=$('dialog'); if(dialog)dialog.close(); ui.modal=null; }
 function toast(message) {const t=$('#toast');t.textContent=message;t.classList.add('show');const feedback=$('dialog[open] .modal-feedback');if(feedback)feedback.textContent=message;clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),4500);}
 function applyRoute(route) {const aliases={policies:'governance/decisions',evidence:'governance/evidence'};const [page,tab,pillar]=(aliases[route]||route).split('/');ui.page=routes.includes(page)||page==='implementation'?page:'overview';if(ui.page==='assurance')ui.assuranceTab=['findings','posture','lifecycle'].includes(tab)?tab:'findings';if(ui.page==='governance')ui.governanceTab=['overview','decisions','attestations','evidence'].includes(tab)?tab:'overview';if(ui.page==='implementation')implementation.applyRoute(tab,pillar);}
 function navigate(page) {applyRoute(page);if(location.hash==='#'+page)render();else location.hash=page;}
+function resetUiState() {Object.assign(ui,{guide:null,provider:'All clouds',evidenceEnv:'All environments',evidenceDomain:'All activity',assuranceEnv:'all',findingState:'Unresolved',findingSeverity:'All priorities',assuranceTab:'findings',governanceTab:'overview'});}
 function eventIcon(domain){return ({foundation:'foundations',access:'access',identity:'lock',assurance:'assurance',governance:'governance',policy:'policies'})[domain]||'evidence';}
 function formError(form,error) {$('[data-form-error]',form).textContent=error.message;}
 function showProvision() {
@@ -204,6 +220,7 @@ function advanceGuide() {
     if(!engine.sessions.some(s=>s.envId===g.envId&&s.personId==='casey'&&s.status==='Active'))throw new Error('Casey needs an active operator session on claims-api-prod for this revocation step.');
     engine.changeControl(g.envId,'image',false);g.findingId=engine.findings.find(f=>f.envId===g.envId&&f.control==='image'&&f.status==='Open').id;g.step=3;ui.assuranceEnv=g.envId;ui.findingState='All states';route='assurance/findings';
   }else if(g.step===3){
+    if(engine.finding(g.findingId).status!=='Open')throw new Error('The walkthrough finding is no longer open. Reset the demo to replay this step.');
     engine.assignFinding(g.findingId,'Claims Platform','The workload owner will replace the image and verify its scan.');
     engine.recordRiskDecision({findingId:g.findingId,disposition:'Remediate',rationale:'Replace the affected production image immediately; no production exception is allowed.'});
     engine.startRemediation(g.findingId);g.step=4;route='assurance/findings';
@@ -242,10 +259,10 @@ document.addEventListener('click',e=>{
     else if(a==='review-exception'){engine.reviewException(id,target.dataset.approve==='true');render();toast('Exception review recorded.');}
     else if(a==='session-evidence'){ui.evidenceEnv=id;ui.evidenceDomain='All activity';closeDialog();navigate('evidence');}
     else if(a==='guide')showGuide();
-    else if(a==='restart-guide'){engine.reset();ui.guide=null;ui.provider='All clouds';ui.evidenceEnv='All environments';ui.evidenceDomain='All activity';ui.assuranceEnv='all';ui.findingState='Unresolved';ui.findingSeverity='All priorities';ui.page='overview';history.replaceState(null,'','#overview');render();showGuide();}
+    else if(a==='restart-guide'){engine.reset();resetUiState();ui.page='overview';history.replaceState(null,'','#overview');render();showGuide();}
     else if(a==='guide-next')advanceGuide();
     else if(a==='reset')openDialog('Reset the demo?',`<p class="modal-intro">Clear the current simulated environments, access requests, sessions, and events, then return to the original sample portfolio.</p><p>Export evidence first if you want to keep the current walkthrough.</p>`,button('Keep exploring','close')+button('Reset demo','confirm-reset','primary','refresh'));
-    else if(a==='confirm-reset'){engine.reset();ui.guide=null;ui.provider='All clouds';ui.evidenceEnv='All environments';ui.evidenceDomain='All activity';ui.assuranceEnv='all';ui.findingState='Unresolved';ui.findingSeverity='All priorities';closeDialog();navigate('overview');render();toast('Demo reset. Ready for a fresh walkthrough.');}
+    else if(a==='confirm-reset'){engine.reset();resetUiState();closeDialog();navigate('overview');render();toast('Demo reset. Ready for a fresh walkthrough.');}
     else if(a==='export'){
       const blob=new Blob([JSON.stringify(engine.exportEvidence(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
       link.href=url;link.download='cloud-trust-demo-evidence.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);toast('Complete synthetic evidence bundle exported.');
@@ -272,9 +289,9 @@ document.addEventListener('submit',e=>{
   }catch(error){formError(form,error);}
 });
 function updateCountdowns(){document.querySelectorAll('[data-countdown]').forEach(el=>{const s=engine.sessions.find(s=>s.id===el.dataset.countdown);if(!s)return;const seconds=Math.max(0,Math.ceil((s.expiresAt-engine.now())/1000));el.textContent=s.status==='Active'?`${Math.floor(seconds/60)}m ${String(seconds%60).padStart(2,'0')}s`:'Closed';});document.querySelectorAll('[data-clock]').forEach(el=>el.textContent=time(engine.now())+' UTC');}
-window.addEventListener('hashchange',()=>{applyRoute(location.hash.slice(1));render();window.scrollTo({top:0,behavior:'instant'});});
+window.addEventListener('hashchange',()=>{applyRoute(location.hash.slice(1));render();window.scrollTo({top:0,behavior:'instant'});if(!$('dialog[open]'))$('main h1')?.focus({preventScroll:true});});
 const implementation=createImplementationGuide({ui,esc,icon,badge,button,pageHeader,openDialog,toast,render});
 const pillars=createPillarViews({engine,ui,esc,icon,badge,provider,time,date,button,empty,pageHeader,openDialog,closeDialog,navigate,toast,render,policies,evidence});
-setInterval(()=>{if(engine.sweep()){render();if(ui.modal?.type==='environment')showEnvironment(ui.modal.id);pillars.refreshModal();updateRequestChecks();}updateCountdowns();},1000);
+setInterval(()=>{if(engine.sweep()){render();if(!dialogHasUserInput()){if(ui.modal?.type==='environment')showEnvironment(ui.modal.id);pillars.refreshModal();}updateRequestChecks();}updateCountdowns();},1000);
 applyRoute(location.hash.slice(1));
 render();
