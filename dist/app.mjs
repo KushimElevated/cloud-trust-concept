@@ -142,7 +142,8 @@ function openDialog(title,body,footer='',type='') {
 }
 function dialogHasUserInput() {
   const dialog=$('dialog[open]');if(!dialog)return false;
-  return [...dialog.querySelectorAll('input:not([type=hidden]),textarea,select')].some(el=>el.tagName==='SELECT'?[...el.options].some(o=>o.selected!==o.defaultSelected):el.value!==el.defaultValue);
+  const defaultIndex=select=>Math.max(0,[...select.options].findIndex(o=>o.defaultSelected));
+  return [...dialog.querySelectorAll('input:not([type=hidden]),textarea,select')].some(el=>el.tagName==='SELECT'?el.selectedIndex!==defaultIndex(el):el.value!==el.defaultValue);
 }
 function closeDialog() { const dialog=$('dialog'); if(dialog)dialog.close(); ui.modal=null; }
 function toast(message) {const t=$('#toast');t.textContent=message;t.classList.add('show');const feedback=$('dialog[open] .modal-feedback');if(feedback)feedback.textContent=message;clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),4500);}

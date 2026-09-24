@@ -90,7 +90,7 @@ The older `#policies` and `#evidence` links route to their corresponding Governa
 | Advance the demo clock by 31 minutes in Cloud Access | A 30-minute grant expires. Two advances also expire a newly approved 60-minute exception. |
 | Record temporary risk acceptance without an approved matching exception | The decision is rejected. |
 | Run scans repeatedly on the same failing control | One unresolved finding is retained; no duplicate is created. |
-| Select Advance 25 h on the Posture view | Current signals fails on every workload, live access is revoked, and current attestations become Stale. Run posture scan to refresh the evidence. |
+| Select Advance 25 h on the Posture view | Current signals fails on every workload and current attestations become Stale. Run posture scan to refresh the evidence. |
 | Restore a network control covered by an approved exception, then fail it again | The exception closes on restoration; the recurrence is not waived. |
 | Approve an attestation and then change the owner's identity or cost center | The prior attestation becomes Stale. |
 | Approve an attestation and inject a new posture finding | The prior snapshot is retained but is no longer Current. |

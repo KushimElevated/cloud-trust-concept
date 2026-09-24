@@ -14,8 +14,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 16240,
-      "sha256": "c1e3a98e4d49d4aba3c3d05159bfd5bcd44b4eaf0405a5181b2d567c11f87c16"
+      "bytes": 16215,
+      "sha256": "6eb79d9517191f87ed0e44f816c291d6e0c10e24b4d30883ff303772aca2d730"
     },
     {
       "path": "START_HERE.md",
@@ -24,8 +24,8 @@
     },
     {
       "path": "dist/app.mjs",
-      "bytes": 52414,
-      "sha256": "45bbaa2b8631da9e01389cd68a382765557fc59d80fa44bef828b24f2fe593e0"
+      "bytes": 52488,
+      "sha256": "98124a46981a1aa27b08c5c0ce73b310e69223e44bee4f7659adbd21be3b5140"
     },
     {
       "path": "dist/cloud-trust-implementation.md",
