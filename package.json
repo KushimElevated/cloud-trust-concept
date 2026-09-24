@@ -1,0 +1,8 @@
+{
+  "name": "cloud-trust-demo",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A connected simulation of Cloud Foundations, Access, Assurance, and Governance.",
+  "scripts": { "test": "node --test tests/*.test.mjs", "check": "node --check dist/app.mjs && node --check dist/engine.mjs && node --check dist/pillars.mjs && node --check dist/implementation.mjs && node --check dist/implementation-data.mjs", "export-guide": "node scripts/export-guide.mjs" }
+}
