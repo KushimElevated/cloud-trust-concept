@@ -129,7 +129,7 @@ test('rejection, expiry, and duplicate attestation submissions preserve review b
   e.reviewAttestation(a.id,false,'Ownership evidence needs a more complete statement before approval.');
   assert.equal(a.status,'Rejected');
   const replacement=attest(e);e.reviewAttestation(replacement.id,true,rationale);
-  e.advance(30*24*60);
+  for(let hours=0;hours<30*24;hours+=12){e.advance(12*60);e.runScan();}
   assert.equal(replacement.status,'Expired');
   assert.equal(e.governanceMetrics().current,0);
   assert.equal(e.events.filter(x=>x.attestationId===replacement.id&&x.action==='Attestation expired').length,1);
@@ -182,4 +182,39 @@ test('evidence records a drift before the finding it causes and does not report 
   assert.equal(e.events.length,count+1);
   assert.equal(e.events[0].action,'Signal re-observed');
   assert.equal(e.events.filter(x=>x.action==='Control restored').length,0);
+});
+
+test('posture evidence older than the freshness window fails the baseline until a scan refreshes it',()=>{
+  const e=setup(),env=e.env('env-payments'),a=attest(e);
+  e.reviewAttestation(a.id,true,rationale);
+  access(e);
+  e.advance(24*60);
+  assert.equal(env.controls.freshness,true,'exactly 24 hours old is still current');
+  e.advance(1);
+  assert.equal(env.controls.freshness,false);
+  assert.equal(e.trust(env).label,'Needs attention');
+  const finding=e.findings.find(f=>f.envId===env.id&&f.control==='freshness');
+  assert.equal(finding.status,'Open');
+  assert.equal(e.sessions[0].status,'Expired');
+  assert.equal(a.status,'Stale');
+  assert.deepEqual(e.events.find(x=>x.action==='Signal freshness lapsed'&&x.envId===env.id).findingIds,[finding.id]);
+  e.runScan(env.id);
+  assert.equal(env.controls.freshness,true);
+  assert.equal(finding.status,'Resolved');
+  assert.equal(e.trust(env).label,'Trusted');
+  assert.equal(a.status,'Stale','restoration does not revive the earlier attestation');
+  assert.equal(e.env('env-analytics').controls.network,false,'a scan repairs nothing but freshness');
+  assert.equal(e.env('env-analytics').controls.freshness,false,'only the scanned workload is refreshed');
+});
+
+test('a lapsed signal revokes live access before its grant would expire',()=>{
+  let clock=Date.UTC(2026,8,24,14,0,0);
+  const e=new TrustEngine(()=>clock);
+  e.advance(23*60+45);
+  access(e,'env-payments',60);
+  clock+=16*60000;
+  e.sweep();
+  assert.equal(e.sessions[0].status,'Revoked');
+  assert.match(e.sessions[0].endReason,/Current signals must be restored/);
+  assert.ok(e.events.find(x=>x.action==='Access automatically revoked').findingIds.length);
 });

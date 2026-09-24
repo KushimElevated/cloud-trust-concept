@@ -45,7 +45,7 @@ Use **Reset demo** before repeating the scenario. Selecting the walkthrough afte
 
 **Findings** is the remediation workbench. Filter by state, priority, or workload. Review a finding, assign an owner, start remediation, and apply and verify its fix. Repeated observations update the existing unresolved finding; recurrence after resolution creates a new finding.
 
-**Posture** shows provider-level control coverage and a workload-by-control matrix. **Run posture scan** observes current synthetic signals and records the observation. It does not repair failed controls or connect to a real scanner.
+**Posture** shows provider-level control coverage and a workload-by-control matrix. **Run posture scan** observes current synthetic signals and records the observation. Posture evidence older than 24 hours fails the Current signals control; a scan refreshes that evidence. A scan does not repair any other failed control or connect to a real scanner. **Advance 25 h** on the Posture view demonstrates the lapse.
 
 **Ownership & lifecycle** records the accountable owner, cost center, and next review. Finding assignments are separate from workload ownership and remain assigned until explicitly changed.
 
@@ -59,7 +59,7 @@ The demonstration remediation targets are four hours for Critical, eight hours f
 
 **Risk & policies** includes the risk register, shared access policy, administrator review queue, and exception workflow. Choose Remediate for an unresolved finding, or Accept temporarily when a matching approved exception exists. Temporary acceptance inherits the exception expiry and leaves the finding open. It does not override another control or identity check.
 
-Only a failing private-networking control on an active nonproduction environment is eligible for the 60-minute exception in this demo. Production failures and identity failures cannot be waived. An exception request has no effect before approval. Expiry re-evaluates dependent sessions.
+Only a failing private-networking control on an active nonproduction environment is eligible for the 60-minute exception in this demo. Production failures and identity failures cannot be waived. An exception request has no effect before approval. Expiry re-evaluates dependent sessions. An exception covers one failure: it closes as soon as the control passes again, so a later recurrence needs a new, reviewed exception. The simulated reviewer cannot decide an exception or attestation for a workload they own.
 
 **Attestations** captures an owner statement and historical evidence snapshot. All six controls must pass; exception-covered failures cannot be attested as healthy. A separate simulated reviewer must approve the submission. Approved attestations remain Current for up to 30 days, unless baseline, ownership, tags, or lifecycle changes make them Stale. Expired and stale records cannot be revived by merely restoring the environment; a new submission is required.
 
@@ -79,6 +79,8 @@ The older `#policies` and `#evidence` links route to their corresponding Governa
 | Advance the demo clock by 31 minutes in Cloud Access | A 30-minute grant expires. Two advances also expire a newly approved 60-minute exception. |
 | Record temporary risk acceptance without an approved matching exception | The decision is rejected. |
 | Run scans repeatedly on the same failing control | One unresolved finding is retained; no duplicate is created. |
+| Select Advance 25 h on the Posture view | Current signals fails on every workload, live access is revoked, and current attestations become Stale. Run posture scan to refresh the evidence. |
+| Restore a network control covered by an approved exception, then fail it again | The exception closes on restoration; the recurrence is not waived. |
 | Approve an attestation and then change the owner's identity or cost center | The prior attestation becomes Stale. |
 | Approve an attestation and inject a new posture finding | The prior snapshot is retained but is no longer Current. |
 | Retire a workload with a live session | Access is revoked before simulated decommissioning. |

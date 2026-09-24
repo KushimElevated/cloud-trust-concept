@@ -1,10 +1,11 @@
+export const SIGNAL_FRESHNESS_HOURS = 24;
 export const CONTROLS = [
   { id: 'image', name: 'Approved image', requirement: 'Approved image with no critical findings in its latest simulated scan.' },
   { id: 'network', name: 'Private networking', requirement: 'Administrative endpoints are private and ingress follows the blueprint.' },
   { id: 'encryption', name: 'Encryption enabled', requirement: 'Storage encryption is enabled with a managed key.' },
   { id: 'logging', name: 'Audit logging', requirement: 'Control-plane audit events are sent to the security log destination.' },
   { id: 'ownership', name: 'Accountable owner', requirement: 'A service owner, cost center, and workload purpose are recorded.' },
-  { id: 'freshness', name: 'Current signals', requirement: 'Required posture evidence is current in this simulation.' }
+  { id: 'freshness', name: 'Current signals', requirement: `Posture evidence was observed within the last ${SIGNAL_FRESHNESS_HOURS} hours.` }
 ];
 export const PEOPLE = [
   { id:'casey', name:'Casey Morgan', initials:'CM', title:'Platform engineer', mfa:true, managed:true, employed:true },
@@ -13,7 +14,7 @@ export const PEOPLE = [
 ];
 export const ROLES = ['Workload operator', 'Platform administrator'];
 export const REVIEWER = 'Taylor Brooks';
-export const POLICY = {version:'1.5',maxAccessMinutes:60,exceptionMinutes:60,attestationDays:30,roles:ROLES,requiredControls:CONTROLS.map(c=>c.id),exceptionScope:{tier:'Nonproduction',control:'network'}};
+export const POLICY = {version:'1.6',maxAccessMinutes:60,signalFreshnessHours:SIGNAL_FRESHNESS_HOURS,exceptionMinutes:60,attestationDays:30,roles:ROLES,requiredControls:CONTROLS.map(c=>c.id),exceptionScope:{tier:'Nonproduction',control:'network'}};
 export const FINDING_TYPES = {
   image:{title:'Critical image finding',category:'Vulnerability',severity:'Critical',hours:4,fix:'Replace the affected image with the approved clean image and verify the new scan.'},
   network:{title:'Public administrative ingress',category:'Configuration drift',severity:'High',hours:8,fix:'Restore private administrative endpoints and validate the ingress rules.'},
@@ -225,8 +226,13 @@ export class TrustEngine {
     this.scans.unshift(scan);
     for(const env of selected){
       env.lastScanAt=this.now();
+      if(!env.controls.freshness){
+        env.controls.freshness=true;
+        this.record('assurance','Control restored',env.id,env.name,'Restored','Current signals: this scan refreshed the posture evidence.',{scanId:scan.id,actor:'Posture evaluator'});
+      }
       this.syncFindings(env);
-      this.record('assurance','Posture scan completed',env.id,env.name,this.trust(env).label,`${this.trust(env).passed}/6 controls pass. A scan observes the current simulated signals; it does not repair failures.`,{scanId:scan.id,actor:'Posture evaluator'});
+      const trust=this.trust(env);
+      this.record('assurance','Posture scan completed',env.id,env.name,trust.label,`${trust.passed}/6 controls pass. A scan observes the current simulated signals and refreshes signal freshness; it does not repair other failures.`,{scanId:scan.id,actor:'Posture evaluator'});
     }
     this.sweep();return scan;
   }
@@ -327,6 +333,12 @@ export class TrustEngine {
   policyDefinition(){return {...copy(POLICY),baseline:copy(CONTROLS),remediationTargetsHours:Object.fromEntries(Object.entries(FINDING_TYPES).map(([k,v])=>[k,v.hours])),enforcement:'Simulation only',lifecycle:'Only Active environments are eligible for access.',attestation:'All controls must pass. Independent simulated review. Invalidated by changes or expiry.'};}
   sweep() {
     const count=this.events.length;
+    for(const env of this.environments) if(env.lifecycle==='Active' && env.controls.freshness && this.now()-env.lastScanAt>POLICY.signalFreshnessHours*3600000) {
+      env.controls.freshness=false;
+      const event=this.record('assurance','Signal freshness lapsed',env.id,env.name,'Needs attention',`No posture observation in the last ${POLICY.signalFreshnessHours} hours. Run a posture scan to refresh the evidence.`,{actor:'Posture evaluator'});
+      this.syncFindings(env);
+      event.findingIds=this.findings.filter(f=>f.envId===env.id&&f.control==='freshness'&&['Open','In progress'].includes(f.status)).map(f=>f.id);
+    }
     for(const exception of this.exceptions) if(exception.status==='Approved' && exception.expiresAt<=this.now()) {
       exception.status='Expired';
       this.record('policy','Exception expired',exception.envId,this.env(exception.envId).name,'Expired','The time-limited networking exception ended. Access is re-evaluated against the current baseline.',{exceptionId:exception.id});
